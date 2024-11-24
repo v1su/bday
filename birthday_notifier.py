@@ -1,33 +1,70 @@
 import json
 import os
 from datetime import datetime
-from telegram import Bot
-from telegram.ext import Application
-from telegram.error import TelegramError
-import asyncio
+from telethon import TelegramClient
+from telethon.errors import RPCError
+
+def format_date_full(date):
+    """
+    Convert a date in YYYY-MM-DD format to a more readable format like '23 September 2000'.
+    """
+    try:
+        parsed_date = datetime.strptime(date, "%Y-%m-%d")
+        return parsed_date.strftime("%d %B %Y")  # e.g., '23 September 2000'
+    except ValueError:
+        # Handle dates without the year
+        parsed_date = datetime.strptime(date, "%m-%d")
+        return parsed_date.strftime("%d %B")  # e.g., '23 September'
 
 async def check_birthdays(file_path):
     """
     Check for birthdays in the JSON file and return the appropriate message.
     """
     today = datetime.now().strftime("%m-%d")
-    message = "🚫 No one's birthday is today. But don't worry! You can still add your birthday! 🎉\n\n💌 Do you want to add your birthday? Just let me know and I'll add it for you! 🎂"
+    full_today = datetime.now().strftime("%d %B %Y")  # Full date format for today
+    message = (
+        f"🌞 **Good Day! Today is {full_today}.**\n\n"
+        "🚫 *No birthdays today!* 🎂 But every day is special, so why not spread some joy and make someone smile today? 🌟\n\n"
+        "✨ Remember, life is worth celebrating every single day! 💫\n\n"
+        "💌 Want to add your birthday to the list? Let me know, and we’ll make sure you get the spotlight when your day arrives! 🎉"
+    )
 
     try:
         # Load the JSON database
-        with open(file_path, 'r') as file:
+        with open(file_path, "r") as file:
             birthdays = json.load(file)
 
         # Check for birthdays
         birthday_people = [entry for entry in birthdays if entry["date"][5:] == today]
 
         if birthday_people:
-            message = "🎉 **Today's Birthdays:**\n\n"
+            message = "✨🎉 **🎂 Happy Birthday! 🎂** 🎉✨\n\n"
             for entry in birthday_people:
                 name = entry["name"]
-                date = entry["date"]
-                message += f"- **{name}** 🎂 - *{date}*\n"
-            message += "\n🥳 Let's wish them a fantastic day! 🎉"
+                birth_date = entry["date"]
+
+                # Format the date with full details
+                formatted_date = format_date_full(birth_date)
+
+                # If year is included, calculate age
+                if len(birth_date) == 10:  # Format YYYY-MM-DD
+                    birth_year = int(birth_date[:4])
+                    current_year = datetime.now().year
+                    age = current_year - birth_year
+                    message += (
+                        f"🎁 **{name}** 🎉\n"
+                        f"🎂 Born on: *{formatted_date}*\n"
+                        f"🌟 Turns **{age} years old** today! 🥳\n\n"
+                    )
+                else:
+                    message += (
+                        f"🎁 **{name}** 🎉\n"
+                        f"🎂 Born on: *{formatted_date}*\n"
+                        f"✨ Let's make their day amazing! 🌈\n\n"
+                    )
+
+            message += "🎊 Don't forget to send them your warmest wishes! 💌\n\n"
+            message += "🎉 *Celebrate like there's no tomorrow!* 🥂"
 
     except FileNotFoundError:
         message = "❗ Error: Birthday database file not found!"
@@ -35,22 +72,17 @@ async def check_birthdays(file_path):
         message = "❗ Error: There was an issue reading the birthday database file. Please check the JSON format."
     except Exception as e:
         message = f"❗ An unexpected error occurred: {str(e)}"
-    
+
     return message
 
-async def send_telegram_message(token, chat_id, message):
+async def send_telegram_message(client, chat_id, message):
     """
     Send a message to a Telegram chat.
     """
     try:
-        # Initialize the bot using the provided token
-        application = Application.builder().token(token).build()
-
-        # Send the message asynchronously
-        await application.bot.send_message(chat_id=chat_id, text=message)
-
-    except TelegramError as e:
-        print(f"Telegram error occurred: {e}")
+        await client.send_message(chat_id, message)
+    except RPCError as e:
+        print(f"Telegram RPC error occurred: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")
 
@@ -62,18 +94,22 @@ async def main():
     file_path = "birthdays.json"
 
     # Telegram Bot Credentials from environment variables (set in GitHub secrets)
-    TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-    CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+    TELEGRAM_API_ID = os.getenv("TELEGRAM_API_ID")
+    TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
+    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-    if TELEGRAM_TOKEN is None or CHAT_ID is None:
-        print("❗ Error: Telegram Bot Token or Chat ID not found in environment variables.")
+    if TELEGRAM_API_ID is None or TELEGRAM_API_HASH is None or TELEGRAM_CHAT_ID is None:
+        print("❗ Error: Telegram API ID, API Hash, or Chat ID not found in environment variables.")
     else:
-        # Generate the birthday message
-        message = await check_birthdays(file_path)
+        # Create Telegram client
+        async with TelegramClient("birthday_notifier", TELEGRAM_API_ID, TELEGRAM_API_HASH) as client:
+            # Generate the birthday message
+            message = await check_birthdays(file_path)
 
-        # Send the message
-        await send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, message)
+            # Send the message
+            await send_telegram_message(client, TELEGRAM_CHAT_ID, message)
 
 # Run the async code
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())
