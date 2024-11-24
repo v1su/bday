@@ -2,7 +2,8 @@ name: Birthday Notifier
 
 on:
   schedule:
-    - cron: '25 3 * * *' # Runs at 11 PM UTC daily
+    - cron: '32 3 * * *' # Runs at 3:25 AM UTC daily
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   notify:
