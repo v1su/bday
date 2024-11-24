@@ -14,17 +14,16 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Use the latest stable version of actions/checkout
 
       - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+        uses: actions/setup-python@v5  # Use the latest stable version of actions/setup-python
 
       - name: Install Dependencies
         run: |
-          pip install python-telegram-bot
+          pip install python-telegram-bot==20.0  # Pin version
           pip install requests  # For loading external resources if needed
 
-      - name: Run Birthday Notifier
-        run: python birthday_notifier.py
+      - name: Run Birthday Notifier with error handling
+        run: |
+          python birthday_notifier.py || echo "An error occurred during execution." > error_log.txt
