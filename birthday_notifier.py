@@ -89,7 +89,8 @@ def send_telegram_message(bot, chat_id, message):
     Send a message to a Telegram chat.
     """
     try:
-        bot.send_message(chat_id, message)
+        # Since you're using python-telegram-bot, send_message is synchronous
+        bot.send_message(chat_id=chat_id, text=message)
     except TelegramError as e:
         logging.error(f"Telegram error occurred: {e}")
     except Exception as e:
