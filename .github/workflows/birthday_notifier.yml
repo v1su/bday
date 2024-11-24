@@ -1,0 +1,24 @@
+name: Birthday Notifier
+
+on:
+  schedule:
+    - cron: '25 3 * * *' # Runs at 11 PM UTC daily
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: pip install python-telegram-bot
+
+      - name: Run Birthday Notifier
+        run: python birthday_notifier.py
