@@ -4,6 +4,7 @@ from datetime import datetime
 from telegram import Bot
 from telegram.ext import Application
 from telegram.error import TelegramError
+import asyncio
 
 async def check_birthdays(file_path):
     """
@@ -53,7 +54,10 @@ async def send_telegram_message(token, chat_id, message):
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")
 
-if __name__ == "__main__":
+async def main():
+    """
+    Main function that gets the birthday message and sends it to Telegram.
+    """
     # Path to the JSON file (You should change this path if needed)
     file_path = "birthdays.json"
 
@@ -69,3 +73,7 @@ if __name__ == "__main__":
 
         # Send the message
         await send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, message)
+
+# Run the async code
+if __name__ == "__main__":
+    asyncio.run(main())
