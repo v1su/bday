@@ -3,6 +3,9 @@ import os
 from datetime import datetime
 from telethon import TelegramClient
 from telethon.errors import RPCError
+import logging
+logging.basicConfig(level=logging.INFO)
+logging.info("Bot started")
 
 # Ensure you have your Telegram Bot Token and API credentials set in environment variables
 # Set these environment variables either in your system or directly in the script
@@ -114,6 +117,7 @@ async def main():
 
         # Send the message
         await send_telegram_message(client, TELEGRAM_CHAT_ID, message)
+        await client.disconnect()  # Disconnect after sending the message
 
 # Run the async code
 if __name__ == "__main__":
