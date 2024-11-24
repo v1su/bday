@@ -1,18 +1,17 @@
 import json
 import os
 from datetime import datetime
-from telethon import TelegramClient
-from telethon.errors import RPCError
 import logging
+from telegram import Bot
+from telegram.error import TelegramError
+
 logging.basicConfig(level=logging.INFO)
 logging.info("Bot started")
 
-# Ensure you have your Telegram Bot Token and API credentials set in environment variables
+# Ensure you have your Telegram Bot Token set in environment variables
 # Set these environment variables either in your system or directly in the script
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_API_ID = int(os.getenv("TELEGRAM_API_ID"))
-TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
-TELEGRAM_CHAT_ID = int(os.getenv("TELEGRAM_CHAT_ID"))
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def format_date_full(date):
     """
@@ -26,7 +25,7 @@ def format_date_full(date):
         parsed_date = datetime.strptime(date, "%m-%d")
         return parsed_date.strftime("%d %B")  # e.g., '23 September'
 
-async def check_birthdays(file_path):
+def check_birthdays(file_path):
     """
     Check for birthdays in the JSON file and return the appropriate message.
     """
@@ -85,41 +84,35 @@ async def check_birthdays(file_path):
 
     return message
 
-async def send_telegram_message(client, chat_id, message):
+def send_telegram_message(bot, chat_id, message):
     """
     Send a message to a Telegram chat.
     """
     try:
-        await client.send_message(chat_id, message)
-    except RPCError as e:
-        print(f"Telegram RPC error occurred: {e}")
+        bot.send_message(chat_id, message)
+    except TelegramError as e:
+        logging.error(f"Telegram error occurred: {e}")
     except Exception as e:
-        print(f"An unexpected error occurred: {str(e)}")
+        logging.error(f"An unexpected error occurred: {str(e)}")
 
-async def main():
+def main():
     """
     Main function that gets the birthday message and sends it to Telegram.
     """
     # Path to the JSON file (You should change this path if needed)
     file_path = "birthdays.json"
 
-    if TELEGRAM_BOT_TOKEN is None or TELEGRAM_API_ID is None or TELEGRAM_API_HASH is None or TELEGRAM_CHAT_ID is None:
-        print("❗ Error: Telegram Bot Token, API ID, API Hash, or Chat ID not found in environment variables.")
+    if TELEGRAM_BOT_TOKEN is None or TELEGRAM_CHAT_ID is None:
+        logging.error("❗ Error: Telegram Bot Token or Chat ID not found in environment variables.")
     else:
-        # Use Bot Token for authentication if available
-        client = TelegramClient("birthday_notifier", TELEGRAM_API_ID, TELEGRAM_API_HASH)
-
-        # Use the bot token for authentication if it's a bot
-        await client.start(bot_token=TELEGRAM_BOT_TOKEN)
+        # Create a Bot object using the token
+        bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
         # Generate the birthday message
-        message = await check_birthdays(file_path)
+        message = check_birthdays(file_path)
 
         # Send the message
-        await send_telegram_message(client, TELEGRAM_CHAT_ID, message)
-        await client.disconnect()  # Disconnect after sending the message
+        send_telegram_message(bot, TELEGRAM_CHAT_ID, message)
 
-# Run the async code
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    main()
