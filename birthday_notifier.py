@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 from telegram import Bot
 from telegram.error import TelegramError
+import asyncio
 
 logging.basicConfig(level=logging.INFO)
 logging.info("Bot started")
@@ -84,19 +85,19 @@ def check_birthdays(file_path):
 
     return message
 
-def send_telegram_message(bot, chat_id, message):
+async def send_telegram_message(bot, chat_id, message):
     """
     Send a message to a Telegram chat.
     """
     try:
-        # Since you're using python-telegram-bot, send_message is synchronous
-        bot.send_message(chat_id=chat_id, text=message)
+        # Since you're using python-telegram-bot version 20.x, this is an async method
+        await bot.send_message(chat_id=chat_id, text=message)
     except TelegramError as e:
         logging.error(f"Telegram error occurred: {e}")
     except Exception as e:
         logging.error(f"An unexpected error occurred: {str(e)}")
 
-def main():
+async def main():
     """
     Main function that gets the birthday message and sends it to Telegram.
     """
@@ -113,7 +114,8 @@ def main():
         message = check_birthdays(file_path)
 
         # Send the message
-        send_telegram_message(bot, TELEGRAM_CHAT_ID, message)
+        await send_telegram_message(bot, TELEGRAM_CHAT_ID, message)
 
 if __name__ == "__main__":
-    main()
+    # Run the main function using asyncio
+    asyncio.run(main())
