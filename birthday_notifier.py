@@ -7,9 +7,9 @@ from telethon.errors import RPCError
 # Ensure you have your Telegram Bot Token and API credentials set in environment variables
 # Set these environment variables either in your system or directly in the script
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_API_ID = os.getenv("TELEGRAM_API_ID")
+TELEGRAM_API_ID = int(os.getenv("TELEGRAM_API_ID"))
 TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+TELEGRAM_CHAT_ID = int(os.getenv("TELEGRAM_CHAT_ID"))
 
 def format_date_full(date):
     """
