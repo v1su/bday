@@ -2,9 +2,10 @@ import json
 import os
 from datetime import datetime
 from telegram import Bot
+from telegram.ext import Application
 from telegram.error import TelegramError
 
-def check_birthdays(file_path):
+async def check_birthdays(file_path):
     """
     Check for birthdays in the JSON file and return the appropriate message.
     """
@@ -36,13 +37,17 @@ def check_birthdays(file_path):
     
     return message
 
-def send_telegram_message(token, chat_id, message):
+async def send_telegram_message(token, chat_id, message):
     """
     Send a message to a Telegram chat.
     """
     try:
-        bot = Bot(token=token)
-        bot.send_message(chat_id=chat_id, text=message)
+        # Initialize the bot using the provided token
+        application = Application.builder().token(token).build()
+
+        # Send the message asynchronously
+        await application.bot.send_message(chat_id=chat_id, text=message)
+
     except TelegramError as e:
         print(f"Telegram error occurred: {e}")
     except Exception as e:
@@ -60,7 +65,7 @@ if __name__ == "__main__":
         print("❗ Error: Telegram Bot Token or Chat ID not found in environment variables.")
     else:
         # Generate the birthday message
-        message = check_birthdays(file_path)
+        message = await check_birthdays(file_path)
 
         # Send the message
-        send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, message)
+        await send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, message)
