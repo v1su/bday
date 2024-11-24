@@ -4,6 +4,13 @@ from datetime import datetime
 from telethon import TelegramClient
 from telethon.errors import RPCError
 
+# Ensure you have your Telegram Bot Token and API credentials set in environment variables
+# Set these environment variables either in your system or directly in the script
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_API_ID = os.getenv("TELEGRAM_API_ID")
+TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
 def format_date_full(date):
     """
     Convert a date in YYYY-MM-DD format to a more readable format like '23 September 2000'.
@@ -93,21 +100,20 @@ async def main():
     # Path to the JSON file (You should change this path if needed)
     file_path = "birthdays.json"
 
-    # Telegram Bot Credentials from environment variables (set in GitHub secrets)
-    TELEGRAM_API_ID = os.getenv("TELEGRAM_API_ID")
-    TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH")
-    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-
-    if TELEGRAM_API_ID is None or TELEGRAM_API_HASH is None or TELEGRAM_CHAT_ID is None:
-        print("❗ Error: Telegram API ID, API Hash, or Chat ID not found in environment variables.")
+    if TELEGRAM_BOT_TOKEN is None or TELEGRAM_API_ID is None or TELEGRAM_API_HASH is None or TELEGRAM_CHAT_ID is None:
+        print("❗ Error: Telegram Bot Token, API ID, API Hash, or Chat ID not found in environment variables.")
     else:
-        # Create Telegram client
-        async with TelegramClient("birthday_notifier", TELEGRAM_API_ID, TELEGRAM_API_HASH) as client:
-            # Generate the birthday message
-            message = await check_birthdays(file_path)
+        # Use Bot Token for authentication if available
+        client = TelegramClient("birthday_notifier", TELEGRAM_API_ID, TELEGRAM_API_HASH)
 
-            # Send the message
-            await send_telegram_message(client, TELEGRAM_CHAT_ID, message)
+        # Use the bot token for authentication if it's a bot
+        await client.start(bot_token=TELEGRAM_BOT_TOKEN)
+
+        # Generate the birthday message
+        message = await check_birthdays(file_path)
+
+        # Send the message
+        await send_telegram_message(client, TELEGRAM_CHAT_ID, message)
 
 # Run the async code
 if __name__ == "__main__":
