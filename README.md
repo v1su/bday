@@ -64,8 +64,6 @@ on:
 ### Example Environment Variables:
 
    - `TELEGRAM_BOT_TOKEN`: Your Telegram bot token.
-   - `TELEGRAM_API_ID`: Your Telegram API ID.
-   - `TELEGRAM_API_HASH`: Your Telegram API hash.
    - `TELEGRAM_CHAT_ID`: The chat ID where the notifications will be sent (either personal or group chat).
 
    You can add these secrets by navigating to **Settings > Secrets > New repository secret**.
@@ -87,10 +85,6 @@ Now, your bot will automatically check for birthdays and notify you every day at
 Define these in your system or a .env file:
 ```
 TELEGRAM_BOT_TOKEN – Your Telegram bot token.
-
-TELEGRAM_API_ID – Your Telegram API ID.
-
-TELEGRAM_API_HASH – Your Telegram API hash.
 
 TELEGRAM_CHAT_ID – Chat ID to receive notifications.
 ```
