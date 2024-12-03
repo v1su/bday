@@ -1,4 +1,4 @@
-# 🎉 Birthday Notifier Bot
+# 🎉 Birthday Notifier V2
 
 A lightweight **Telegram bot** built using **Telethon**, designed to send daily birthday reminders directly to your Telegram chat. Never forget a loved one's special day again!
 
